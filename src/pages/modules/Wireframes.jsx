@@ -1,11 +1,11 @@
 import Navbar from '../../components/Navbar'
 import Footer from '../../components/Footer'
 import ActivityButton from '../../components/ActivityButton'
+import { Link } from 'react-router-dom'
 
 const Wireframes = ({ user }) => {
     return (
         <div className="min-h-screen flex flex-col">
-            <Navbar user={user} />
 
             <div className="flex-grow p-8 max-w-4xl mx-auto">
                 <h1 className="text-4xl font-bold mb-6 text-center text-primary">Wireframes</h1>
@@ -45,7 +45,7 @@ const Wireframes = ({ user }) => {
                 </div>
 
                 <div className="flex justify-center mt-10">
-                    <ActivityButton to="/wireframes-activity" user={user} />
+                    <Link to="/wireframe-activity" className="btn btn-accent btn-lg" user={user}>Juega y Aprende  </Link>
                 </div>
             </div>
 

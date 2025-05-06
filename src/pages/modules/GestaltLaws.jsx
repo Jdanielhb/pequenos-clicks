@@ -6,7 +6,6 @@ import { Link } from 'react-router-dom'
 const GestaltLaws = ({ user }) => {
     return (
         <div className="min-h-screen flex flex-col">
-            {/* <Navbar user={user} /> */}
 
             <div className="flex-grow p-8 max-w-4xl mx-auto">
                 <h1 className="text-4xl font-bold mb-6 text-center text-primary">Leyes de Gestalt</h1>

@@ -1,11 +1,11 @@
 import Navbar from '../../components/Navbar'
 import Footer from '../../components/Footer'
 import ActivityButton from '../../components/ActivityButton'
+import { Link } from 'react-router-dom'
 
 const DataCollection = ({ user }) => {
     return (
         <div className="min-h-screen flex flex-col">
-            <Navbar user={user} />
 
             <div className="flex-grow p-8 max-w-4xl mx-auto">
                 <h1 className="text-4xl font-bold mb-6 text-center text-primary">Métodos de Recolección de Datos</h1>
@@ -42,7 +42,7 @@ const DataCollection = ({ user }) => {
                 </div>
 
                 <div className="flex justify-center mt-10">
-                    <ActivityButton to="/data-collection-activity" user={user} />
+                    <Link to="/data-activity" className="btn btn-accent btn-lg" user={user}>Juega y Aprende  </Link>
                 </div>
             </div>
 

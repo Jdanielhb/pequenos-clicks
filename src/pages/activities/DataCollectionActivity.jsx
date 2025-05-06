@@ -39,7 +39,8 @@ const DataCollectionActivity = ({ user, completeModule }) => {
                 "Análisis de datos estadísticos"
             ],
             correct: 1,
-            feedback: "¡Correcto! La observación en contexto muestra el comportamiento real de los usuarios."
+            feedbackCorrect: "¡Correcto! La observación en contexto muestra el comportamiento real de los usuarios.",
+            feedbackIncorrect: "Incorrecto. La mejor opción es la observación en contexto, ya que permite ver cómo las personas usan realmente el producto en su entorno natural."
         },
         {
             question: "Si quieres opiniones de muchas personas rápidamente, ¿qué método usarías?",
@@ -50,7 +51,8 @@ const DataCollectionActivity = ({ user, completeModule }) => {
                 "Pruebas de usabilidad"
             ],
             correct: 2,
-            feedback: "¡Exacto! Las encuestas permiten recolectar datos de muchas personas eficientemente."
+            feedbackCorrect: "¡Exacto! Las encuestas permiten recolectar datos de muchas personas eficientemente.",
+            feedbackIncorrect: "No es la mejor opción. Las encuestas son el método más eficiente para recolectar opiniones de muchas personas rápidamente."
         },
         {
             question: "¿Qué método te permite hacer preguntas de seguimiento basadas en respuestas previas?",
@@ -61,7 +63,8 @@ const DataCollectionActivity = ({ user, completeModule }) => {
                 "Pruebas A/B"
             ],
             correct: 1,
-            feedback: "¡Muy bien! En entrevistas puedes adaptar tus preguntas según las respuestas."
+            feedbackCorrect: "¡Muy bien! En entrevistas puedes adaptar tus preguntas según las respuestas.",
+            feedbackIncorrect: "Respuesta incorrecta. Las entrevistas en persona son ideales para hacer preguntas de seguimiento basadas en respuestas previas."
         },
         {
             question: "¿Cuál es el principal beneficio de las pruebas de usabilidad?",
@@ -72,7 +75,8 @@ const DataCollectionActivity = ({ user, completeModule }) => {
                 "Medir el atractivo visual"
             ],
             correct: 1,
-            feedback: "¡Sí! Las pruebas de usabilidad revelan problemas prácticos que enfrentan los usuarios."
+            feedbackCorrect: "¡Correcto! Las pruebas de usabilidad revelan problemas prácticos que enfrentan los usuarios.",
+            feedbackIncorrect: "No es correcto. El principal beneficio de las pruebas de usabilidad es identificar problemas reales que los usuarios encuentran al usar el producto."
         }
     ];
 
@@ -162,7 +166,11 @@ const DataCollectionActivity = ({ user, completeModule }) => {
                         {showResult && (
                             <div className={`alert ${selectedOption === questions[currentQuestion].correct ? 'alert-success' : 'alert-error'} mb-6`}>
                                 <div>
-                                    <span>{questions[currentQuestion].feedback}</span>
+                                    <span>
+                                        {selectedOption === questions[currentQuestion].correct
+                                            ? questions[currentQuestion].feedbackCorrect
+                                            : questions[currentQuestion].feedbackIncorrect}
+                                    </span>
                                 </div>
                             </div>
                         )}

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { FaPalette, FaShapes, FaListOl, FaClipboardList, FaVectorSquare } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const Home = ({ isLoggedIn }) => {
     const modules = [
@@ -72,9 +73,10 @@ const Home = ({ isLoggedIn }) => {
                             <div className="mb-4">{module.icon}</div>
                             <h2 className="card-title text-2xl mb-2">{module.name}</h2>
                             {isLoggedIn ? (
-                                <a href={module.path} className="btn btn-accent mt-4">Explorar</a>
+                                <Link  to={module.path} className="btn btn-accent mt-4">Explorar</Link>
                             ) : (
-                                <a href="/login" className="btn btn-disabled mt-4">Inicia sesión para acceder</a>
+                                <Link to="/login" className="btn btn-disabled mt-4">Inicia sesión para acceder</Link>
+
                             )}
                         </div>
                     </motion.div>

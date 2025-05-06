@@ -1,6 +1,7 @@
 import Navbar from '../../components/Navbar'
 import Footer from '../../components/Footer'
 import ActivityButton from '../../components/ActivityButton'
+import { Link } from 'react-router-dom'
 
 const NielsenPrinciples = ({ user }) => {
     const principles = [
@@ -18,7 +19,6 @@ const NielsenPrinciples = ({ user }) => {
 
     return (
         <div className="min-h-screen flex flex-col">
-            <Navbar user={user} />
 
             <div className="flex-grow p-8 max-w-4xl mx-auto">
                 <h1 className="text-4xl font-bold mb-6 text-center text-primary">Los 10 principios de Jakob Nielsen</h1>
@@ -44,7 +44,7 @@ const NielsenPrinciples = ({ user }) => {
                 </div>
 
                 <div className="flex justify-center mt-10">
-                    <ActivityButton to="/nielsen-activity" user={user} />
+                    <Link to="/nielsen-activity" className="btn btn-accent btn-lg" user={user}>Juega y Aprende  </Link>
                 </div>
             </div>
 
