@@ -14,6 +14,8 @@ const GestaltActivity = ({ user, completeModule }) => {
         width: window.innerWidth,
         height: window.innerHeight,
     });
+    const [connections, setConnections] = useState({});
+    const [activeItem, setActiveItem] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -29,37 +31,60 @@ const GestaltActivity = ({ user, completeModule }) => {
     }, []);
 
     const steps = [
-        {
-            type: 'question',
-            question: "¿Qué ley de Gestalt explica que agrupamos elementos similares?",
-            options: ["Proximidad", "Semejanza", "Cierre", "Continuidad"],
-            correct: 1,
-            feedback: "¡Correcto! La ley de Semejanza dice que agrupamos elementos que se parecen en forma, color o tamaño."
-        },
-        {
-            type: 'question',
-            question: "Si ves puntos que forman una línea aunque no estén conectados, ¿qué ley aplica?",
-            options: ["Figura/Fondo", "Continuidad", "Proximidad", "Cierre"],
-            correct: 1,
-            feedback: "¡Exacto! La ley de Continuidad hace que sigamos líneas aunque no estén completas."
-        },
+        // {
+        //     type: 'question',
+        //     question: "¿Qué ley de Gestalt explica que agrupamos elementos similares?",
+        //     options: ["Proximidad", "Semejanza", "Cierre", "Continuidad"],
+        //     correct: 1,
+        //     feedback: "¡Correcto! La ley de Semejanza dice que agrupamos elementos que se parecen en forma, color o tamaño."
+        // },
+        // {
+        //     type: 'question',
+        //     question: "Si ves puntos que forman una línea aunque no estén conectados, ¿qué ley aplica?",
+        //     options: ["Figura/Fondo", "Continuidad", "Proximidad", "Cierre"],
+        //     correct: 1,
+        //     feedback: "¡Exacto! La ley de Continuidad hace que sigamos líneas aunque no estén completas."
+        // },
         {
             type: 'matching',
-            instruction: "Une cada imagen con la ley de Gestalt que representa:",
-            items: [
-                { image: "🔵 🔵 🔴 🔴 🔵 🔵", law: "Semejanza" },
-                { image: "🔵   🔵   🔵   🔵", law: "Continuidad" },
-                { image: "🔵🔵  🔴🔴  🔵🔵", law: "Proximidad" },
-                { image: "◻️◻️◻️\n◻️  ◻️\n◻️◻️◻️", law: "Cierre" }
+            instruction: "Une cada ley de Gestalt con su definición correspondiente:",
+            pairs: [
+                { 
+                    left: "Ley de Semejanza", 
+                    right: "Agrupamos elementos que comparten características visuales similares",
+                    correctRight: "Agrupamos elementos que comparten características visuales similares"
+                },
+                { 
+                    left: "Ley de Proximidad", 
+                    right: "Elementos cercanos entre sí se perciben como pertenecientes al mismo grupo",
+                    correctRight: "Elementos cercanos entre sí se perciben como pertenecientes al mismo grupo"
+                },
+                { 
+                    left: "Ley de Cierre", 
+                    right: "Nuestra mente completa las figuras incompletas",
+                    correctRight: "Nuestra mente completa las figuras incompletas"
+                },
+                { 
+                    left: "Ley de Continuidad", 
+                    right: "Seguimos líneas y curvas aunque estén interrumpidas",
+                    correctRight: "Seguimos líneas y curvas aunque estén interrumpidas"
+                }
+            ],
+            // Mezclar las opciones de la derecha para el ejercicio
+            shuffledRight: [
+                "Agrupamos elementos que comparten características visuales similares",
+                "Seguimos líneas y curvas aunque estén interrumpidas",
+                "Nuestra mente completa las figuras incompletas",
+                "Elementos cercanos entre sí se perciben como pertenecientes al mismo grupo"
             ]
         },
-        {
-            type: 'question',
-            question: "¿Qué ley nos permite ver una figura aunque esté incompleta?",
-            options: ["Semejanza", "Cierre", "Figura/Fondo", "Proximidad"],
-            correct: 1,
-            feedback: "¡Muy bien! La ley de Cierre hace que nuestra mente complete las figuras incompletas."
-        }
+        // {
+        //     type: 'question',
+        //     question: "¿Qué ley nos permite ver una figura aunque esté incompleta?",
+        //     options: ["Semejanza", "Cierre", "Figura/Fondo", "Proximidad"],
+        //     correct: 1,
+        //     feedback: "¡Muy bien! La ley de Cierre hace que nuestra mente complete las figuras incompletas."
+        // }
     ];
 
     const handleAnswer = (stepIndex, answer) => {
@@ -69,14 +94,50 @@ const GestaltActivity = ({ user, completeModule }) => {
             }
             setSelectedOptions({ ...selectedOptions, [stepIndex]: answer });
         } else {
-            setScore(score + 1);
+            // Verificar si todas las conexiones están correctas
+            const currentStepData = steps[stepIndex];
+            let allCorrect = true;
+            
+            currentStepData.pairs.forEach(pair => {
+                if (connections[pair.left] !== pair.correctRight) {
+                    allCorrect = false;
+                }
+            });
+
+            if (allCorrect) {
+                setScore(score + 1);
+            }
             setSelectedOptions({ ...selectedOptions, [stepIndex]: 'completed' });
+        }
+    };
+
+    const handleConnect = (leftItem, rightItem) => {
+        setConnections(prev => ({
+            ...prev,
+            [leftItem]: rightItem
+        }));
+    };
+
+    const handleItemClick = (item, isLeft) => {
+        if (activeItem === null) {
+            setActiveItem({ item, isLeft });
+        } else {
+            if (activeItem.isLeft !== isLeft) {
+                if (activeItem.isLeft) {
+                    handleConnect(activeItem.item, item);
+                } else {
+                    handleConnect(item, activeItem.item);
+                }
+            }
+            setActiveItem(null);
         }
     };
 
     const handleNext = () => {
         if (currentStep < steps.length - 1) {
             setCurrentStep(currentStep + 1);
+            setConnections({});
+            setActiveItem(null);
         } else {
             setShowConfetti(true);
             completeModule("Leyes de Gestalt");
@@ -90,6 +151,8 @@ const GestaltActivity = ({ user, completeModule }) => {
     const handlePrev = () => {
         if (currentStep > 0) {
             setCurrentStep(currentStep - 1);
+            setConnections({});
+            setActiveItem(null);
         }
     };
 
@@ -169,23 +232,66 @@ const GestaltActivity = ({ user, completeModule }) => {
                             <div>
                                 <h2 className="text-2xl font-bold mb-6">{steps[currentStep].instruction}</h2>
 
-                                <div className="space-y-6 mb-8">
-                                    {steps[currentStep].items.map((item, index) => (
-                                        <div key={index} className="flex items-center gap-4">
-                                            <div className="text-4xl">{item.image}</div>
-                                            <div className="flex-1">
-                                                <div className="font-mono bg-base-200 p-2 rounded">
-                                                    Ley de {item.law}
-                                                </div>
+                                <div className="flex gap-8 mb-8">
+                                    {/* Columna izquierda - Leyes */}
+                                    <div className="flex-1 space-y-4">
+                                        {steps[currentStep].pairs.map((pair, index) => (
+                                            <div 
+                                                key={index}
+                                                className={`p-4 border-2 rounded-lg cursor-pointer transition-all 
+                                                    ${activeItem?.item === pair.left && activeItem?.isLeft ? 'border-primary bg-primary/10' : ''}
+                                                    ${connections[pair.left] ? 'border-success' : 'border-base-300'}`}
+                                                onClick={() => handleItemClick(pair.left, true)}
+                                            >
+                                                {pair.left}
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
+
+                                    {/* Columna derecha - Definiciones */}
+                                    <div className="flex-1 space-y-4">
+                                        {steps[currentStep].shuffledRight.map((item, index) => (
+                                            <div 
+                                                key={index}
+                                                className={`p-4 border-2 rounded-lg cursor-pointer transition-all 
+                                                    ${activeItem?.item === item && !activeItem?.isLeft ? 'border-primary bg-primary/10' : ''}
+                                                    ${Object.values(connections).includes(item) ? 'border-success' : 'border-base-300'}`}
+                                                onClick={() => handleItemClick(item, false)}
+                                            >
+                                                {item}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Mostrar conexiones actuales */}
+                                <div className="mb-6">
+                                    <h3 className="text-lg font-semibold mb-2">Tus conexiones:</h3>
+                                    {Object.keys(connections).length > 0 ? (
+                                        <ul className="space-y-2">
+                                            {Object.entries(connections).map(([left, right]) => (
+                                                <li key={left} className="flex items-center gap-2">
+                                                    <span className="font-medium">{left}</span>
+                                                    <span className="text-primary">→</span>
+                                                    <span>{right}</span>
+                                                    {steps[currentStep].pairs.find(p => p.left === left)?.correctRight === right ? (
+                                                        <span className="text-success">✓</span>
+                                                    ) : (
+                                                        <span className="text-error">✗</span>
+                                                    )}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p className="text-gray-500">Aún no has hecho ninguna conexión</p>
+                                    )}
                                 </div>
 
                                 {selectedOptions[currentStep] === undefined && (
                                     <button
                                         className="btn btn-primary"
                                         onClick={() => handleAnswer(currentStep, 'completed')}
+                                        disabled={Object.keys(connections).length !== steps[currentStep].pairs.length}
                                     >
                                         Completar Ejercicio
                                     </button>
