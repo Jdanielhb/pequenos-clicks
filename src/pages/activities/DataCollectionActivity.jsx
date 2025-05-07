@@ -15,6 +15,8 @@ const DataCollectionActivity = ({ user, completeModule }) => {
         width: window.innerWidth,
         height: window.innerHeight,
     });
+
+    const passingScore = 3;
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -93,13 +95,29 @@ const DataCollectionActivity = ({ user, completeModule }) => {
             setSelectedOption(null);
             setShowResult(false);
         } else {
-            setShowConfetti(true);
-            completeModule("Métodos de Recolección de Datos");
-            setTimeout(() => {
-                setShowConfetti(false);
-                setShowCertificate(true);
-            }, 2000);
+            const passed = score + (selectedOption === questions[currentQuestion].correct ? 1 : 0) >= passingScore;
+            if (passed) {
+                setScore(prev => prev + (selectedOption === questions[currentQuestion].correct ? 1 : 0));
+                setShowConfetti(true);
+                completeModule("Métodos de Recolección de Datos");
+                setTimeout(() => {
+                    setShowConfetti(false);
+                    setShowCertificate(true);
+                }, 2000);
+            } else {
+                setScore(prev => prev + (selectedOption === questions[currentQuestion].correct ? 1 : 0));
+                setShowCertificate(true); // Muestra resultados sin certificado
+            }
         }
+    };
+
+    const handleRestart = () => {
+        setCurrentQuestion(0);
+        setSelectedOption(null);
+        setScore(0);
+        setShowResult(false);
+        setShowCertificate(false);
+        setShowConfetti(false);
     };
 
     if (!user) {
@@ -189,7 +207,7 @@ const DataCollectionActivity = ({ user, completeModule }) => {
                                     className="btn btn-primary"
                                     onClick={handleNext}
                                 >
-                                    {currentQuestion < questions.length - 1 ? 'Siguiente' : 'Ver resultados'}
+                                    {currentQuestion < questions.length - 1 ? 'Siguiente' : 'Finalizar'}
                                 </button>
                             )}
 
@@ -200,23 +218,34 @@ const DataCollectionActivity = ({ user, completeModule }) => {
                     </div>
                 ) : (
                     <div className="text-center">
-                        <div className="alert alert-success max-w-2xl mx-auto mb-8">
+                        <div className={`alert ${score >= passingScore ? 'alert-success' : 'alert-error'} max-w-2xl mx-auto mb-8`}>
                             <div>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <span>
-                                    ¡Felicidades {user}! Has completado la actividad con una puntuación de {score}/{questions.length}
+                                    {score >= passingScore
+                                        ? `¡Felicidades ${user}! Has aprobado con una puntuación de ${score}/${questions.length}`
+                                        : `Lo intentaste ${user}, pero no alcanzaste la puntuación mínima. Tu puntuación fue ${score}/${questions.length}.`}
                                 </span>
                             </div>
                         </div>
 
-                        <button
-                            className="btn btn-primary mr-4"
-                            onClick={() => setShowCertificate(true)}
-                        >
-                            Ver Certificado
-                        </button>
+                        {score >= passingScore ? (
+                            <button
+                                className="btn btn-primary mr-4"
+                                onClick={() => setShowCertificate(true)}
+                            >
+                                Ver Certificado
+                            </button>
+                        ) : (
+                            <button
+                                className="btn btn-primary mr-4"
+                                onClick={handleRestart}
+                            >
+                                Reintentar Actividad
+                            </button>
+                        )}
 
                         <button
                             className="btn btn-outline"
@@ -228,7 +257,7 @@ const DataCollectionActivity = ({ user, completeModule }) => {
                 )}
             </div>
 
-            {showCertificate && (
+            {showCertificate && score >= passingScore && (
                 <CertificateModal
                     user={user}
                     moduleName="Métodos de Recolección de Datos"
@@ -245,3 +274,4 @@ const DataCollectionActivity = ({ user, completeModule }) => {
 };
 
 export default DataCollectionActivity;
+

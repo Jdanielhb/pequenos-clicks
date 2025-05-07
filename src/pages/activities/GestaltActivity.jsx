@@ -31,41 +31,35 @@ const GestaltActivity = ({ user, completeModule }) => {
     }, []);
 
     const steps = [
-        // {
-        //     type: 'question',
-        //     question: "¿Qué ley de Gestalt explica que agrupamos elementos similares?",
-        //     options: ["Proximidad", "Semejanza", "Cierre", "Continuidad"],
-        //     correct: 1,
-        //     feedback: "¡Correcto! La ley de Semejanza dice que agrupamos elementos que se parecen en forma, color o tamaño."
-        // },
-        // {
-        //     type: 'question',
-        //     question: "Si ves puntos que forman una línea aunque no estén conectados, ¿qué ley aplica?",
-        //     options: ["Figura/Fondo", "Continuidad", "Proximidad", "Cierre"],
-        //     correct: 1,
-        //     feedback: "¡Exacto! La ley de Continuidad hace que sigamos líneas aunque no estén completas."
-        // },
         {
             type: 'matching',
-            instruction: "Une cada ley de Gestalt con su definición correspondiente:",
+            instruction: "Une cada imagen con su ley de Gestalt correspondiente:",
             pairs: [
-                { 
-                    left: "Ley de Semejanza", 
+                {
+                    left: {
+                        image: "/src/assets/images/Ley_de_Semejanza.png",
+                    },
                     right: "Agrupamos elementos que comparten características visuales similares",
                     correctRight: "Agrupamos elementos que comparten características visuales similares"
                 },
-                { 
-                    left: "Ley de Proximidad", 
+                {
+                    left: {
+                        image: "/src/assets/images/Ley_de_Proximidad.png",
+                    },
                     right: "Elementos cercanos entre sí se perciben como pertenecientes al mismo grupo",
                     correctRight: "Elementos cercanos entre sí se perciben como pertenecientes al mismo grupo"
                 },
-                { 
-                    left: "Ley de Cierre", 
+                {
+                    left: {
+                        image: "/src/assets/images/Ley_de_Cierre.png",
+                    },
                     right: "Nuestra mente completa las figuras incompletas",
                     correctRight: "Nuestra mente completa las figuras incompletas"
                 },
-                { 
-                    left: "Ley de Continuidad", 
+                {
+                    left: {
+                        image: "/src/assets/images/Ley_de_Continuidad.png",
+                    },
                     right: "Seguimos líneas y curvas aunque estén interrumpidas",
                     correctRight: "Seguimos líneas y curvas aunque estén interrumpidas"
                 }
@@ -77,14 +71,7 @@ const GestaltActivity = ({ user, completeModule }) => {
                 "Nuestra mente completa las figuras incompletas",
                 "Elementos cercanos entre sí se perciben como pertenecientes al mismo grupo"
             ]
-        },
-        // {
-        //     type: 'question',
-        //     question: "¿Qué ley nos permite ver una figura aunque esté incompleta?",
-        //     options: ["Semejanza", "Cierre", "Figura/Fondo", "Proximidad"],
-        //     correct: 1,
-        //     feedback: "¡Muy bien! La ley de Cierre hace que nuestra mente complete las figuras incompletas."
-        // }
+        }
     ];
 
     const handleAnswer = (stepIndex, answer) => {
@@ -97,9 +84,9 @@ const GestaltActivity = ({ user, completeModule }) => {
             // Verificar si todas las conexiones están correctas
             const currentStepData = steps[stepIndex];
             let allCorrect = true;
-            
+
             currentStepData.pairs.forEach(pair => {
-                if (connections[pair.left] !== pair.correctRight) {
+                if (connections[pair.left.image] !== pair.correctRight) {
                     allCorrect = false;
                 }
             });
@@ -139,12 +126,20 @@ const GestaltActivity = ({ user, completeModule }) => {
             setConnections({});
             setActiveItem(null);
         } else {
+            const passed = score >= Math.ceil(steps.length / 2); // Aprobado si tiene al menos la mitad correcta
             setShowConfetti(true);
-            completeModule("Leyes de Gestalt");
-            setTimeout(() => {
-                setShowConfetti(false);
-                setShowCertificate(true);
-            }, 2000);
+            completeModule("Leyes de Gestalt", passed);
+            
+            if (passed) {
+                setTimeout(() => {
+                    setShowConfetti(false);
+                    setShowCertificate(true);
+                }, 2000);
+            } else {
+                setTimeout(() => {
+                    setShowConfetti(false);
+                }, 2000);
+            }
         }
     };
 
@@ -233,17 +228,21 @@ const GestaltActivity = ({ user, completeModule }) => {
                                 <h2 className="text-2xl font-bold mb-6">{steps[currentStep].instruction}</h2>
 
                                 <div className="flex gap-8 mb-8">
-                                    {/* Columna izquierda - Leyes */}
-                                    <div className="flex-1 space-y-4">
+                                    {/* Columna izquierda - Imágenes */}
+                                    <div className="grid grid-cols-1 gap-4 w-1/2 justify-center">
                                         {steps[currentStep].pairs.map((pair, index) => (
-                                            <div 
+                                            <div
                                                 key={index}
-                                                className={`p-4 border-2 rounded-lg cursor-pointer transition-all 
-                                                    ${activeItem?.item === pair.left && activeItem?.isLeft ? 'border-primary bg-primary/10' : ''}
-                                                    ${connections[pair.left] ? 'border-success' : 'border-base-300'}`}
-                                                onClick={() => handleItemClick(pair.left, true)}
+                                                className={`relative flex h-100 w-[300px] cursor-pointer flex-col overflow-hidden rounded-xl bg-white justify-center shadow-md transition-all 
+                                                    ${activeItem?.item === pair.left.image && activeItem?.isLeft ? 'ring-4 ring-primary' : ''}
+                                                    ${connections[pair.left.image] ? 'ring-4 ring-success' : ''}`}
+                                                onClick={() => handleItemClick(pair.left.image, true)}
                                             >
-                                                {pair.left}
+                                                <img
+                                                    alt={pair.left.title}
+                                                    className="h-[200px] w-[300px]"
+                                                    src={pair.left.image}
+                                                />
                                             </div>
                                         ))}
                                     </div>
@@ -251,7 +250,7 @@ const GestaltActivity = ({ user, completeModule }) => {
                                     {/* Columna derecha - Definiciones */}
                                     <div className="flex-1 space-y-4">
                                         {steps[currentStep].shuffledRight.map((item, index) => (
-                                            <div 
+                                            <div
                                                 key={index}
                                                 className={`p-4 border-2 rounded-lg cursor-pointer transition-all 
                                                     ${activeItem?.item === item && !activeItem?.isLeft ? 'border-primary bg-primary/10' : ''}
@@ -269,18 +268,28 @@ const GestaltActivity = ({ user, completeModule }) => {
                                     <h3 className="text-lg font-semibold mb-2">Tus conexiones:</h3>
                                     {Object.keys(connections).length > 0 ? (
                                         <ul className="space-y-2">
-                                            {Object.entries(connections).map(([left, right]) => (
-                                                <li key={left} className="flex items-center gap-2">
-                                                    <span className="font-medium">{left}</span>
-                                                    <span className="text-primary">→</span>
-                                                    <span>{right}</span>
-                                                    {steps[currentStep].pairs.find(p => p.left === left)?.correctRight === right ? (
-                                                        <span className="text-success">✓</span>
-                                                    ) : (
-                                                        <span className="text-error">✗</span>
-                                                    )}
-                                                </li>
-                                            ))}
+                                            {Object.entries(connections).map(([image, definition]) => {
+                                                const pair = steps[currentStep].pairs.find(p => p.left.image === image);
+                                                return (
+                                                    <li key={image} className="flex items-center gap-2">
+                                                        <div className="w-16 h-12 rounded overflow-hidden">
+                                                            <img 
+                                                                src={image} 
+                                                                alt={pair?.left.title || 'Imagen'} 
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </div>
+                                                        <span className="font-medium">{pair?.left.title}</span>
+                                                        <span className="text-primary">→</span>
+                                                        <span>{definition}</span>
+                                                        {steps[currentStep].pairs.find(p => p.left.image === image)?.correctRight === definition ? (
+                                                            <span className="text-success">✓</span>
+                                                        ) : (
+                                                            <span className="text-error">✗</span>
+                                                        )}
+                                                    </li>
+                                                );
+                                            })}
                                         </ul>
                                     ) : (
                                         <p className="text-gray-500">Aún no has hecho ninguna conexión</p>
@@ -353,7 +362,7 @@ const GestaltActivity = ({ user, completeModule }) => {
                 )}
             </div>
 
-            {showCertificate && (
+            {showCertificate && score >= Math.ceil(steps.length / 2) && (
                 <CertificateModal
                     user={user}
                     moduleName="Leyes de Gestalt"

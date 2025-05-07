@@ -5,10 +5,9 @@ import CertificateModal from '../../components/CertificateModal';
 import Confetti from 'react-confetti';
 
 const NielsenActivity = ({ user, completeModule }) => {
-    const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [selectedOption, setSelectedOption] = useState(null);
+    const [connections, setConnections] = useState({});
+    const [activeItem, setActiveItem] = useState(null);
     const [score, setScore] = useState(0);
-    const [showResult, setShowResult] = useState(false);
     const [showCertificate, setShowCertificate] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
     const [windowSize, setWindowSize] = useState({
@@ -29,71 +28,79 @@ const NielsenActivity = ({ user, completeModule }) => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const questions = [
+    // Principios de Nielsen con imágenes representativas
+    const principles = [
         {
-            question: "¿Cuál de estos es un principio de usabilidad de Nielsen?",
-            options: [
-                "Visibilidad del estado del sistema",
-                "Usar muchos colores brillantes",
-                "Mostrar toda la información posible",
-                "Evitar estándares comunes"
-            ],
-            correct: 0,
-            feedback: "¡Correcto! La visibilidad del estado del sistema es el primer principio."
+            image: "/src/assets/images/nielsen_visibilidad.png",
+            description: "Visibilidad del estado del sistema: El sistema debe mantener informado al usuario sobre lo que está ocurriendo"
         },
         {
-            question: "¿Qué principio sugiere que el diseño debe hablar el lenguaje del usuario?",
-            options: [
-                "Control y libertad del usuario",
-                "Correspondencia entre el sistema y el mundo real",
-                "Consistencia y estándares",
-                "Prevención de errores"
-            ],
-            correct: 1,
-            feedback: "¡Exacto! El sistema debe usar conceptos familiares para el usuario."
+            image: "/src/assets/images/nielsen_mundo_real.png",
+            description: "Correspondencia con el mundo real: El sistema debe hablar el lenguaje del usuario"
         },
         {
-            question: "¿Qué principio ayuda a los usuarios a recuperarse de errores?",
-            options: [
-                "Reconocimiento antes que recuerdo",
-                "Ayuda a reconocer, diagnosticar y recuperarse de errores",
-                "Diseño estético y minimalista",
-                "Flexibilidad y eficiencia de uso"
-            ],
-            correct: 1,
-            feedback: "¡Muy bien! El noveno principio trata sobre la recuperación de errores."
+            image: "/src/assets/images/nielsen_control.png",
+            description: "Control y libertad del usuario: El usuario debe tener una 'salida de emergencia' claramente marcada"
         },
         {
-            question: "¿Cuál principio recomienda tener atajos para usuarios expertos?",
-            options: [
-                "Prevención de errores",
-                "Flexibilidad y eficiencia de uso",
-                "Control y libertad del usuario",
-                "Ayuda y documentación"
-            ],
-            correct: 1,
-            feedback: "¡Sí! La flexibilidad permite atajos para usuarios avanzados."
+            image: "/src/assets/images/nielsen_consistencia.png",
+            description: "Consistencia y estándares: Los usuarios no deben cuestionar si diferentes palabras significan lo mismo"
+        },
+        {
+            image: "/src/assets/images/nielsen_prevencion.png",
+            description: "Prevención de errores: Mejor que un buen mensaje de error es un diseño cuidadoso que prevenga el problema"
         }
     ];
 
-    const handleAnswer = () => {
-        if (selectedOption === questions[currentQuestion].correct) {
-            setScore(score + 1);
-        }
-        setShowResult(true);
+    // Mezclar las descripciones para el ejercicio
+    const shuffledDescriptions = principles.map(p => p.description).sort(() => Math.random() - 0.5);
+
+    const handleConnect = (leftItem, rightItem) => {
+        setConnections(prev => ({
+            ...prev,
+            [leftItem]: rightItem
+        }));
     };
 
-    const handleNext = () => {
-        if (currentQuestion < questions.length - 1) {
-            setCurrentQuestion(currentQuestion + 1);
-            setSelectedOption(null);
-            setShowResult(false);
+    const handleItemClick = (item, isLeft) => {
+        if (activeItem === null) {
+            setActiveItem({ item, isLeft });
         } else {
-            setShowConfetti(true);
-            completeModule("Principios de Nielsen");
+            if (activeItem.isLeft !== isLeft) {
+                if (activeItem.isLeft) {
+                    handleConnect(activeItem.item, item);
+                } else {
+                    handleConnect(item, activeItem.item);
+                }
+            }
+            setActiveItem(null);
+        }
+    };
+
+    const handleComplete = () => {
+        // Verificar respuestas correctas
+        let correctAnswers = 0;
+
+        principles.forEach(principle => {
+            if (connections[principle.image] === principle.description) {
+                correctAnswers++;
+            }
+        });
+
+        setScore(correctAnswers);
+        const passed = correctAnswers >= Math.ceil(principles.length / 2);
+
+        setShowConfetti(true);
+        completeModule("Principios de Nielsen", passed);
+
+        if (passed) {
             setTimeout(() => {
                 setShowConfetti(false);
                 setShowCertificate(true);
+            }, 2000);
+        } else {
+            setTimeout(() => {
+                setShowConfetti(false);
             }, 2000);
         }
     };
@@ -128,66 +135,97 @@ const NielsenActivity = ({ user, completeModule }) => {
                 />
             )}
 
-            <div className="flex-grow p-8 max-w-4xl mx-auto">
+            <div className="flex-grow p-8 max-w-6xl mx-auto">
                 <h1 className="text-4xl font-bold mb-8 text-center text-primary">Actividad: Principios de Nielsen</h1>
 
                 {!showCertificate ? (
                     <div className="bg-white p-8 rounded-lg shadow-xl">
+                        <h2 className="text-2xl font-bold mb-6 text-center">
+                            Une cada imagen con su principio correspondiente
+                        </h2>
+
+                        <div className="flex gap-8 mb-8">
+                            {/* Columna izquierda - Imágenes */}
+                            <div className="grid grid-cols-1 gap-6 w-1/2">
+                                {principles.map((principle, index) => (
+                                    <div
+                                        key={index}
+                                        className={`relative flex h-64 w-full cursor-pointer flex-col overflow-hidden rounded-xl bg-white justify-center items-center shadow-md transition-all 
+                                            ${activeItem?.item === principle.image && activeItem?.isLeft ? 'ring-4 ring-primary' : ''}
+                                            ${connections[principle.image] ? 'ring-4 ring-success' : ''}`}
+                                        onClick={() => handleItemClick(principle.image, true)}
+                                    >
+                                        <div className="w-full h-full flex items-center justify-center p-4">
+                                            <img
+                                                alt={`Principio ${index + 1}`}
+                                                className="max-h-full max-w-full object-contain"
+                                                src={principle.image}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Columna derecha - Descripciones */}
+                            <div className="flex-1 space-y-6">
+                                {shuffledDescriptions.map((description, index) => (
+                                    <div
+                                        key={index}
+                                        className={`p-4 border-2 rounded-lg cursor-pointer transition-all h-24 flex items-center
+                                            ${activeItem?.item === description && !activeItem?.isLeft ? 'border-primary bg-primary/10' : ''}
+                                            ${Object.values(connections).includes(description) ? 'border-success' : 'border-base-300'}`}
+                                        onClick={() => handleItemClick(description, false)}
+                                    >
+                                        {description}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Mostrar conexiones actuales */}
                         <div className="mb-6">
-                            <span className="text-lg font-medium">
-                                Pregunta {currentQuestion + 1} de {questions.length}
-                            </span>
-                            <div className="w-full bg-gray-200 rounded-full h-4 mt-2">
-                                <div
-                                    className="bg-blue-600 h-4 rounded-full"
-                                    style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
-                                ></div>
-                            </div>
-                        </div>
+                            <h3 className="text-lg font-semibold mb-2">Tus conexiones:</h3>
+                            {Object.keys(connections).length > 0 ? (
+                                <ul className="space-y-2">
+                                    {Object.entries(connections).map(([image, description]) => {
+                                        const principle = principles.find(p => p.image === image);
+                                        const isCorrect = principle?.description === description;
 
-                        <h2 className="text-2xl font-bold mb-6">{questions[currentQuestion].question}</h2>
-
-                        <div className="grid grid-cols-1 gap-4 mb-8">
-                            {questions[currentQuestion].options.map((option, index) => (
-                                <button
-                                    key={index}
-                                    className={`btn btn-outline ${selectedOption === index ? 'btn-primary' : ''} justify-start text-lg`}
-                                    onClick={() => !showResult && setSelectedOption(index)}
-                                >
-                                    {String.fromCharCode(65 + index)}. {option}
-                                </button>
-                            ))}
-                        </div>
-
-                        {showResult && (
-                            <div className={`alert ${selectedOption === questions[currentQuestion].correct ? 'alert-success' : 'alert-error'} mb-6`}>
-                                <div>
-                                    <span>{questions[currentQuestion].feedback}</span>
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="flex justify-between">
-                            {!showResult ? (
-                                <button
-                                    className="btn btn-primary"
-                                    onClick={handleAnswer}
-                                    disabled={selectedOption === null}
-                                >
-                                    Responder
-                                </button>
+                                        return (
+                                            <li key={image} className="flex items-center gap-2">
+                                                <div className="w-16 h-12 rounded overflow-hidden bg-gray-100 flex items-center justify-center">
+                                                    <img
+                                                        src={image}
+                                                        alt="Principio"
+                                                        className="max-h-full max-w-full object-contain"
+                                                    />
+                                                </div>
+                                                <span className="text-primary">→</span>
+                                                <span className={`flex-1 ${isCorrect ? 'text-success' : 'text-error'}`}>
+                                                    {description}
+                                                </span>
+                                                {isCorrect ? (
+                                                    <span className="text-success">✓</span>
+                                                ) : (
+                                                    <span className="text-error">✗</span>
+                                                )}
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
                             ) : (
-                                <button
-                                    className="btn btn-primary"
-                                    onClick={handleNext}
-                                >
-                                    {currentQuestion < questions.length - 1 ? 'Siguiente' : 'Ver resultados'}
-                                </button>
+                                <p className="text-gray-500">Aún no has hecho ninguna conexión</p>
                             )}
+                        </div>
 
-                            <div className="badge badge-primary badge-lg p-4">
-                                Puntuación: {score}/{currentQuestion + 1}
-                            </div>
+                        <div className="flex justify-center">
+                            <button
+                                className="btn btn-primary"
+                                onClick={handleComplete}
+                                disabled={Object.keys(connections).length !== principles.length}
+                            >
+                                Completar Actividad
+                            </button>
                         </div>
                     </div>
                 ) : (
@@ -198,7 +236,7 @@ const NielsenActivity = ({ user, completeModule }) => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <span>
-                                    ¡Felicidades {user}! Has completado la actividad con una puntuación de {score}/{questions.length}
+                                    ¡Felicidades {user}! Has completado la actividad con una puntuación de {score}/{principles.length}
                                 </span>
                             </div>
                         </div>
@@ -220,7 +258,7 @@ const NielsenActivity = ({ user, completeModule }) => {
                 )}
             </div>
 
-            {showCertificate && (
+            {showCertificate && score >= Math.ceil(principles.length / 2) && (
                 <CertificateModal
                     user={user}
                     moduleName="Principios de Nielsen"

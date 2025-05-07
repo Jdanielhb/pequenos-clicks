@@ -283,7 +283,7 @@ const WireframeBuilderActivity = ({ user, completeModule }) => {
                                     </div>
 
                                     <div
-                                        className="border-2 border-dashed border-gray-300 rounded-lg p-6 min-h-[500px] bg-gray-50"
+                                        className="border-2 border-dashed border-gray-300 rounded-lg p-6 min-h-[1500px] bg-gray-50"
                                         onDrop={handleDrop}
                                         onDragOver={handleDragOver}
                                     >
